@@ -12,5 +12,10 @@
     return true;
   });
 
-  console.log("[CONTROL] middleware active (browser)");
+  // 🔥 Erste echte Steuerung
+  window.Events.on("ui:test", (payload) => {
+    console.log("[CONTROL ACTION] ui:test handled", payload);
+  });
+
+  console.log("[CONTROL] middleware + handlers active");
 })();
