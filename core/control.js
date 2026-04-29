@@ -4,15 +4,18 @@
     return;
   }
 
-  function waitForBrain(cb) {
-    if (window.ControlplaneBrain) return cb();
-
-    const interval = setInterval(() => {
-      if (window.ControlplaneBrain) {
-        clearInterval(interval);
-        cb();
+  function runWhenReady(fn) {
+    const tryRun = () => {
+      if (
+        window.ControlplaneBrain &&
+        document.getElementById("adminBrainLog")
+      ) {
+        fn();
+      } else {
+        setTimeout(tryRun, 50);
       }
-    }, 10);
+    };
+    tryRun();
   }
 
   window.Events.use((event) => {
@@ -23,9 +26,8 @@
     return true;
   });
 
-  // 🔥 WORKSPACE
   window.Events.on("ui:workspace:open", (payload) => {
-    waitForBrain(() => {
+    runWhenReady(() => {
       window.ControlplaneBrain.log(
         "SYSTEM",
         "Workspace geöffnet: " + (payload?.name || "Unnamed")
@@ -33,9 +35,8 @@
     });
   });
 
-  // 🔥 USER
   window.Events.on("ui:user:create", (payload) => {
-    waitForBrain(() => {
+    runWhenReady(() => {
       window.ControlplaneBrain.log(
         "SYSTEM",
         "User erstellt: " +
@@ -45,9 +46,8 @@
     });
   });
 
-  // 🔥 CHAT
   window.Events.on("ui:chat:send", (payload) => {
-    waitForBrain(async () => {
+    runWhenReady(async () => {
       const message = payload?.message;
       if (!message) return;
 
@@ -66,5 +66,5 @@
     });
   });
 
-  console.log("[CONTROL] brain-sync active");
+  console.log("[CONTROL] brain fully synced (UI + logic)");
 })();
