@@ -18,7 +18,7 @@
       ts: Date.now()
     });
 
-    scheduleInject();
+    inject();
   });
 
   window.Events.on("ui:user:create", (payload) => {
@@ -30,22 +30,14 @@
       ts: Date.now()
     });
 
-    scheduleInject();
+    inject();
   });
 
-  // 🔥 WICHTIG: UI wartet, dann injizieren
-  function scheduleInject() {
-    setTimeout(() => inject(), 50);
-  }
-
+  // 🔥 CORE INJECTION
   function inject() {
     const state = window.State.get();
-
     const workspace = document.querySelector("#workspaces");
-    if (!workspace) {
-      console.warn("[INJECT] #workspaces fehlt");
-      return;
-    }
+    if (!workspace) return;
 
     let panel = document.querySelector("#cpanel");
 
@@ -75,5 +67,21 @@
     });
   }
 
-  console.log("[CONTROL] injection stabilized (timed)");
+  // 🔥 WICHTIG: DOM WATCHER
+  function observe() {
+    const target = document.body;
+
+    const observer = new MutationObserver(() => {
+      inject();
+    });
+
+    observer.observe(target, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  observe();
+
+  console.log("[CONTROL] mutation observer active");
 })();
