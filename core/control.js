@@ -12,64 +12,40 @@
     return true;
   });
 
+  // 🔥 WORKSPACE → Brain Log
   window.Events.on("ui:workspace:open", (payload) => {
-    if (!window.State) return;
-
-    window.State.addWorkspace({
-      name: payload?.name || "Unnamed",
-      ts: Date.now()
-    });
-
-    render();
-  });
-
-  window.Events.on("ui:user:create", (payload) => {
-    if (!window.State) return;
-
-    window.State.addUser({
-      name: payload?.name || "User",
-      role: payload?.role || "unknown",
-      ts: Date.now()
-    });
-
-    render();
-  });
-
-  function render() {
-    if (!window.State || !window.State.get) return;
-
-    const workspace = document.querySelector("#workspaces");
-    if (!workspace) return;
-
-    let panel = document.querySelector("#cpanel");
-
-    if (!panel) {
-      panel = document.createElement("div");
-      panel.id = "cpanel";
-      panel.style.border = "1px solid #444";
-      panel.style.marginTop = "10px";
-      panel.style.padding = "8px";
-      panel.style.background = "#111";
-      workspace.prepend(panel);
+    if (window.ControlplaneBrain) {
+      window.ControlplaneBrain.log("SYSTEM", "Workspace geöffnet: " + (payload?.name || "Unnamed"));
     }
+  });
 
-    const state = window.State.get();
+  // 🔥 USER → Brain Log
+  window.Events.on("ui:user:create", (payload) => {
+    if (window.ControlplaneBrain) {
+      window.ControlplaneBrain.log("SYSTEM",
+        "User erstellt: " + (payload?.name || "User") +
+        " (" + (payload?.role || "unknown") + ")"
+      );
+    }
+  });
 
-    panel.innerHTML = "";
+  // 🔥 CHAT → direkt ins Gehirn
+  window.Events.on("ui:chat:send", async (payload) => {
+    if (!window.ControlplaneBrain) return;
 
-    state.workspaces.forEach(ws => {
-      const el = document.createElement("div");
-      el.innerHTML = "<b>WS:</b> " + ws.name;
-      panel.appendChild(el);
-    });
+    const message = payload?.message;
+    if (!message) return;
 
-    state.users.forEach(u => {
-      const el = document.createElement("div");
-      el.style.fontSize = "12px";
-      el.textContent = "- " + u.name + " (" + u.role + ")";
-      panel.appendChild(el);
-    });
-  }
+    window.ControlplaneBrain.log("Du", message);
 
-  console.log("[CONTROL] stable mode (no observer)");
+    const data = await window.ControlplaneBrain.api("/api/chat", { message });
+
+    window.ControlplaneBrain.log("Zentralhirn",
+      data.reply || data.error || "Keine Antwort"
+    );
+
+    await window.ControlplaneBrain.refreshState();
+  });
+
+  console.log("[CONTROL] brain integration active");
 })();
