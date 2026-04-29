@@ -4,8 +4,6 @@
     return;
   }
 
-  let isRendering = false;
-
   window.Events.use((event) => {
     if (!event.startsWith("ui:")) {
       console.warn("[REJECT NON-UI EVENT]", event);
@@ -22,7 +20,7 @@
       ts: Date.now()
     });
 
-    inject();
+    render();
   });
 
   window.Events.on("ui:user:create", (payload) => {
@@ -34,18 +32,14 @@
       ts: Date.now()
     });
 
-    inject();
+    render();
   });
 
-  function inject() {
-    if (isRendering) return;
-
+  function render() {
     if (!window.State || !window.State.get) return;
 
     const workspace = document.querySelector("#workspaces");
     if (!workspace) return;
-
-    isRendering = true;
 
     let panel = document.querySelector("#cpanel");
 
@@ -75,29 +69,7 @@
       el.textContent = "- " + u.name + " (" + u.role + ")";
       panel.appendChild(el);
     });
-
-    isRendering = false;
   }
 
-  function observe() {
-    const observer = new MutationObserver(() => {
-      if (!isRendering) {
-        inject();
-      }
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  window.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
-      observe();
-      inject();
-    }, 50);
-  });
-
-  console.log("[CONTROL] observer stabilized (loop-safe)");
+  console.log("[CONTROL] stable mode (no observer)");
 })();
