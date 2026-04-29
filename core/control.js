@@ -1,20 +1,13 @@
-import { Brain } from '../brain/brain.js';
-import { Conversation } from '../brain/conversation.js';
-import { Workers } from '../modules/module-runtime.js';
+import { Events } from './events.js';
 
-const Events = {
-  listeners: {},
-  on(e,f){(this.listeners[e]=this.listeners[e]||[]).push(f)},
-  emit(e,d){console.log("📡 EVENT:",e,d);(this.listeners[e]||[]).forEach(f=>f(d))}
-};
+Events.use((event, payload) => {
+  // nur UI Events erlaubt (harte Regel)
+  if (!event.startsWith("ui:")) {
+    console.warn("[REJECT NON-UI EVENT]", event);
+    return false;
+  }
 
-window.ControlPlane = {
-  events: Events,
-  brain: Brain,
-  workers: Workers,
-  conversation: Conversation
-};
+  return true;
+});
 
-Brain.init();
-
-console.log("⚡ CONTROL PLANE READY");
+console.log("[CONTROL] middleware active");
