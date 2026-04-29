@@ -19,7 +19,7 @@
       ts: Date.now()
     });
 
-    render();
+    inject();
   });
 
   // USER
@@ -32,45 +32,48 @@
       ts: Date.now()
     });
 
-    render();
+    inject();
   });
 
-  function render() {
-    renderWorkspaces();
-  }
-
-  function renderWorkspaces() {
-    const container = document.querySelector("#workspaces");
-    if (!container) return;
-
+  // 🔥 WICHTIG: KEIN FULL RENDER → nur INJECTION
+  function inject() {
     const state = window.State.get();
-    container.innerHTML = "";
 
+    const workspace = document.querySelector("#workspaces");
+    if (!workspace) {
+      console.warn("[INJECT] #workspaces fehlt");
+      return;
+    }
+
+    // bestehenden Bereich NICHT löschen!
+    let panel = document.querySelector("#cpanel");
+
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "cpanel";
+      panel.style.border = "1px solid #444";
+      panel.style.marginTop = "10px";
+      panel.style.padding = "8px";
+      workspace.prepend(panel);
+    }
+
+    panel.innerHTML = "";
+
+    // Workspaces anzeigen
     state.workspaces.forEach(ws => {
       const el = document.createElement("div");
-      el.style.padding = "8px";
-      el.style.borderBottom = "1px solid #333";
-      el.innerHTML = "<b>Workspace:</b> " + ws.name;
+      el.innerHTML = "<b>WS:</b> " + ws.name;
+      panel.appendChild(el);
+    });
 
-      // 🔥 USERS IM WORKSPACE ANZEIGEN
-      const users = state.users || [];
-      if (users.length) {
-        const userBox = document.createElement("div");
-        userBox.style.fontSize = "12px";
-        userBox.style.marginTop = "4px";
-
-        users.forEach(u => {
-          const uEl = document.createElement("div");
-          uEl.textContent = "- " + u.name + " (" + u.role + ")";
-          userBox.appendChild(uEl);
-        });
-
-        el.appendChild(userBox);
-      }
-
-      container.appendChild(el);
+    // Users anzeigen
+    state.users.forEach(u => {
+      const el = document.createElement("div");
+      el.style.fontSize = "12px";
+      el.textContent = "- " + u.name + " (" + u.role + ")";
+      panel.appendChild(el);
     });
   }
 
-  console.log("[CONTROL] unified workspace + user render active");
+  console.log("[CONTROL] injection mode active");
 })();
