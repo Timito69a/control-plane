@@ -12,26 +12,33 @@
     return true;
   });
 
-  window.Events.on("ui:test", (payload) => {
-    console.log("[CONTROL ACTION] ui:test handled", payload);
-  });
-
-  // 🔥 STATE FIRST (nicht mehr direkt DOM!)
+  // WORKSPACE
   window.Events.on("ui:workspace:open", (payload) => {
-    console.log("[CONTROL ACTION] open workspace", payload);
-
-    if (!window.State) {
-      console.warn("[STATE] not available");
-      return;
-    }
-
     window.State.addWorkspace({
       name: payload?.name || "Unnamed",
       ts: Date.now()
     });
 
-    renderWorkspaces();
+    render();
   });
+
+  // USER
+  window.Events.on("ui:user:create", (payload) => {
+    console.log("[CONTROL ACTION] create user", payload);
+
+    window.State.addUser({
+      name: payload?.name || "User",
+      role: payload?.role || "unknown",
+      ts: Date.now()
+    });
+
+    render();
+  });
+
+  function render() {
+    renderWorkspaces();
+    renderUsers();
+  }
 
   function renderWorkspaces() {
     const container = document.querySelector("#workspaces");
@@ -42,12 +49,32 @@
 
     state.workspaces.forEach(ws => {
       const el = document.createElement("div");
-      el.style.padding = "8px";
-      el.style.borderBottom = "1px solid #333";
-      el.textContent = "Workspace: " + ws.name;
+      el.style.padding = "6px";
+      el.textContent = "WS: " + ws.name;
       container.appendChild(el);
     });
   }
 
-  console.log("[CONTROL] middleware + state handlers active");
+  function renderUsers() {
+    let container = document.querySelector("#users");
+
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "users";
+      container.style.marginTop = "10px";
+      document.body.appendChild(container);
+    }
+
+    const state = window.State.get();
+    container.innerHTML = "";
+
+    state.users.forEach(u => {
+      const el = document.createElement("div");
+      el.style.padding = "4px";
+      el.textContent = "User: " + u.name + " (" + u.role + ")";
+      container.appendChild(el);
+    });
+  }
+
+  console.log("[CONTROL] workspace + user control active");
 })();
