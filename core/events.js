@@ -1,4 +1,4 @@
-export const Events = (() => {
+(function () {
   const handlers = {};
   const middleware = [];
 
@@ -10,7 +10,7 @@ export const Events = (() => {
     }
   }
 
-  return {
+  const Events = {
     emit(event, payload) {
       log(event, payload);
 
@@ -47,4 +47,6 @@ export const Events = (() => {
       middleware.push(fn);
     }
   };
+
+  window.Events = Events;
 })();
