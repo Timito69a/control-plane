@@ -1,0 +1,89 @@
+<div class="workspace-view" data-workspace="admin-chat">
+
+  <header class="content-header">
+    <div class="content-title">Chat Verwaltung</div>
+    <div class="content-subtitle">Kommunikation · Vorgänge · Projekte · Tasks</div>
+  </header>
+
+  <section class="workspace--two-columns">
+
+    <!-- LEFT: TABELLE -->
+    <div class="workspace-column">
+
+      <div class="section-block">
+        <div class="section-title">Chats / Vorgänge</div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Thema</th>
+              <th>Status</th>
+              <th>Aktivität</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="active-row" data-chat="1">
+              <td>Anna Müller</td>
+              <td>CRM Anfrage</td>
+              <td>Offen</td>
+              <td>vor 2 Min</td>
+            </tr>
+            <tr data-chat="2">
+              <td>Mandant X</td>
+              <td>ERP Projekt</td>
+              <td>Aktiv</td>
+              <td>vor 10 Min</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT: DETAIL -->
+    <div class="workspace-column">
+
+      <div class="section-block">
+        <div class="section-title">Verlauf</div>
+
+        <div id="chat-log">
+          <p><strong>Anna Müller:</strong> Ich brauche ein CRM</p>
+          <p><strong>System:</strong> Projekt kann erstellt werden</p>
+        </div>
+
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Kontext</div>
+        <div id="chat-context">
+          Mandant: Default<br>
+          Thema: CRM<br>
+          Status: Offen
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Aktionen</div>
+
+        <button data-action="create-project">Projekt erstellen</button>
+        <button data-action="create-task">Task anlegen</button>
+        <button data-action="assign">Zuweisen</button>
+        <button data-action="archive">Archivieren</button>
+
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Bearbeitung</div>
+
+        <textarea id="chat-input" rows="3"></textarea>
+        <button id="chat-send">Speichern / Senden</button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
