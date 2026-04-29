@@ -4,8 +4,7 @@
     return;
   }
 
-  // 🔒 nur UI Events erlauben
-  window.Events.use((event, payload) => {
+  window.Events.use((event) => {
     if (!event.startsWith("ui:")) {
       console.warn("[REJECT NON-UI EVENT]", event);
       return false;
@@ -13,28 +12,42 @@
     return true;
   });
 
-  // 🔥 TEST HANDLER
   window.Events.on("ui:test", (payload) => {
     console.log("[CONTROL ACTION] ui:test handled", payload);
   });
 
-  // 🔥 WORKSPACE OPEN
+  // 🔥 STATE FIRST (nicht mehr direkt DOM!)
   window.Events.on("ui:workspace:open", (payload) => {
     console.log("[CONTROL ACTION] open workspace", payload);
 
-    const container = document.querySelector("#workspaces");
-    if (!container) {
-      console.warn("[WORKSPACE] container missing");
+    if (!window.State) {
+      console.warn("[STATE] not available");
       return;
     }
 
-    const el = document.createElement("div");
-    el.style.padding = "8px";
-    el.style.borderBottom = "1px solid #333";
-    el.textContent = "Workspace: " + (payload?.name || "Unnamed");
+    window.State.addWorkspace({
+      name: payload?.name || "Unnamed",
+      ts: Date.now()
+    });
 
-    container.prepend(el);
+    renderWorkspaces();
   });
 
-  console.log("[CONTROL] middleware + handlers active");
+  function renderWorkspaces() {
+    const container = document.querySelector("#workspaces");
+    if (!container) return;
+
+    const state = window.State.get();
+    container.innerHTML = "";
+
+    state.workspaces.forEach(ws => {
+      const el = document.createElement("div");
+      el.style.padding = "8px";
+      el.style.borderBottom = "1px solid #333";
+      el.textContent = "Workspace: " + ws.name;
+      container.appendChild(el);
+    });
+  }
+
+  console.log("[CONTROL] middleware + state handlers active");
 })();
