@@ -4,6 +4,8 @@
     return;
   }
 
+  let isRendering = false;
+
   window.Events.use((event) => {
     if (!event.startsWith("ui:")) {
       console.warn("[REJECT NON-UI EVENT]", event);
@@ -24,8 +26,6 @@
   });
 
   window.Events.on("ui:user:create", (payload) => {
-    console.log("[CONTROL ACTION] create user", payload);
-
     if (!window.State) return;
 
     window.State.addUser({
@@ -38,15 +38,14 @@
   });
 
   function inject() {
-    // 🔥 HARTE ABSICHERUNG
-    if (!window.State || !window.State.get) {
-      return;
-    }
+    if (isRendering) return;
 
-    const state = window.State.get();
+    if (!window.State || !window.State.get) return;
 
     const workspace = document.querySelector("#workspaces");
     if (!workspace) return;
+
+    isRendering = true;
 
     let panel = document.querySelector("#cpanel");
 
@@ -59,6 +58,8 @@
       panel.style.background = "#111";
       workspace.prepend(panel);
     }
+
+    const state = window.State.get();
 
     panel.innerHTML = "";
 
@@ -74,11 +75,15 @@
       el.textContent = "- " + u.name + " (" + u.role + ")";
       panel.appendChild(el);
     });
+
+    isRendering = false;
   }
 
   function observe() {
     const observer = new MutationObserver(() => {
-      inject();
+      if (!isRendering) {
+        inject();
+      }
     });
 
     observer.observe(document.body, {
@@ -87,7 +92,6 @@
     });
   }
 
-  // 🔥 WICHTIG: WARTEN BIS ALLES GELADEN IST
   window.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       observe();
@@ -95,5 +99,5 @@
     }, 50);
   });
 
-  console.log("[CONTROL] mutation observer stabilized (state-safe)");
+  console.log("[CONTROL] observer stabilized (loop-safe)");
 })();
