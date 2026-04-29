@@ -13,6 +13,8 @@
   });
 
   window.Events.on("ui:workspace:open", (payload) => {
+    if (!window.State) return;
+
     window.State.addWorkspace({
       name: payload?.name || "Unnamed",
       ts: Date.now()
@@ -24,6 +26,8 @@
   window.Events.on("ui:user:create", (payload) => {
     console.log("[CONTROL ACTION] create user", payload);
 
+    if (!window.State) return;
+
     window.State.addUser({
       name: payload?.name || "User",
       role: payload?.role || "unknown",
@@ -33,9 +37,14 @@
     inject();
   });
 
-  // 🔥 CORE INJECTION
   function inject() {
+    // 🔥 HARTE ABSICHERUNG
+    if (!window.State || !window.State.get) {
+      return;
+    }
+
     const state = window.State.get();
+
     const workspace = document.querySelector("#workspaces");
     if (!workspace) return;
 
@@ -67,21 +76,24 @@
     });
   }
 
-  // 🔥 WICHTIG: DOM WATCHER
   function observe() {
-    const target = document.body;
-
     const observer = new MutationObserver(() => {
       inject();
     });
 
-    observer.observe(target, {
+    observer.observe(document.body, {
       childList: true,
       subtree: true
     });
   }
 
-  observe();
+  // 🔥 WICHTIG: WARTEN BIS ALLES GELADEN IST
+  window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      observe();
+      inject();
+    }, 50);
+  });
 
-  console.log("[CONTROL] mutation observer active");
+  console.log("[CONTROL] mutation observer stabilized (state-safe)");
 })();
