@@ -6,4 +6,6 @@ logs/
 *.log
 *.tar.gz
 *.zip
+*.bak
+archive/
 .DS_Store
