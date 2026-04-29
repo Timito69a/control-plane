@@ -37,7 +37,6 @@
 
   function render() {
     renderWorkspaces();
-    renderUsers();
   }
 
   function renderWorkspaces() {
@@ -49,32 +48,29 @@
 
     state.workspaces.forEach(ws => {
       const el = document.createElement("div");
-      el.style.padding = "6px";
-      el.textContent = "WS: " + ws.name;
+      el.style.padding = "8px";
+      el.style.borderBottom = "1px solid #333";
+      el.innerHTML = "<b>Workspace:</b> " + ws.name;
+
+      // 🔥 USERS IM WORKSPACE ANZEIGEN
+      const users = state.users || [];
+      if (users.length) {
+        const userBox = document.createElement("div");
+        userBox.style.fontSize = "12px";
+        userBox.style.marginTop = "4px";
+
+        users.forEach(u => {
+          const uEl = document.createElement("div");
+          uEl.textContent = "- " + u.name + " (" + u.role + ")";
+          userBox.appendChild(uEl);
+        });
+
+        el.appendChild(userBox);
+      }
+
       container.appendChild(el);
     });
   }
 
-  function renderUsers() {
-    let container = document.querySelector("#users");
-
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "users";
-      container.style.marginTop = "10px";
-      document.body.appendChild(container);
-    }
-
-    const state = window.State.get();
-    container.innerHTML = "";
-
-    state.users.forEach(u => {
-      const el = document.createElement("div");
-      el.style.padding = "4px";
-      el.textContent = "User: " + u.name + " (" + u.role + ")";
-      container.appendChild(el);
-    });
-  }
-
-  console.log("[CONTROL] workspace + user control active");
+  console.log("[CONTROL] unified workspace + user render active");
 })();
