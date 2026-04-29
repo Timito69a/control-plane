@@ -12,17 +12,15 @@
     return true;
   });
 
-  // WORKSPACE
   window.Events.on("ui:workspace:open", (payload) => {
     window.State.addWorkspace({
       name: payload?.name || "Unnamed",
       ts: Date.now()
     });
 
-    inject();
+    scheduleInject();
   });
 
-  // USER
   window.Events.on("ui:user:create", (payload) => {
     console.log("[CONTROL ACTION] create user", payload);
 
@@ -32,10 +30,14 @@
       ts: Date.now()
     });
 
-    inject();
+    scheduleInject();
   });
 
-  // 🔥 WICHTIG: KEIN FULL RENDER → nur INJECTION
+  // 🔥 WICHTIG: UI wartet, dann injizieren
+  function scheduleInject() {
+    setTimeout(() => inject(), 50);
+  }
+
   function inject() {
     const state = window.State.get();
 
@@ -45,7 +47,6 @@
       return;
     }
 
-    // bestehenden Bereich NICHT löschen!
     let panel = document.querySelector("#cpanel");
 
     if (!panel) {
@@ -54,19 +55,18 @@
       panel.style.border = "1px solid #444";
       panel.style.marginTop = "10px";
       panel.style.padding = "8px";
+      panel.style.background = "#111";
       workspace.prepend(panel);
     }
 
     panel.innerHTML = "";
 
-    // Workspaces anzeigen
     state.workspaces.forEach(ws => {
       const el = document.createElement("div");
       el.innerHTML = "<b>WS:</b> " + ws.name;
       panel.appendChild(el);
     });
 
-    // Users anzeigen
     state.users.forEach(u => {
       const el = document.createElement("div");
       el.style.fontSize = "12px";
@@ -75,5 +75,5 @@
     });
   }
 
-  console.log("[CONTROL] injection mode active");
+  console.log("[CONTROL] injection stabilized (timed)");
 })();
